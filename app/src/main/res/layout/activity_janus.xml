@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:id="@+id/kkrtc_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <android.opengl.GLSurfaceView
+            android:id="@+id/glview"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent" />
+    </RelativeLayout>
+    <RelativeLayout
+        android:id="@+id/kkrtc_checkbox"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    </RelativeLayout>
+
+    <TableLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="10dp">
+
+        <TableRow>
+            <TextView
+                android:text="房间号:"
+                android:visibility="visible"
+                android:textColor="#ff0000" >
+            </TextView>
+            <EditText
+                android:id="@+id/RoomNo"
+                android:visibility="visible"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginLeft="0dp"
+                android:ems="10"
+                android:inputType="text"
+                android:textColor="#ff00ff">
+            </EditText>
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:text="AppID:"
+                android:visibility="visible"
+                android:textColor="#ff0000" >
+            </TextView>
+            <EditText
+                android:id="@+id/appid"
+                android:visibility="visible"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginLeft="0dp"
+                android:ems="10"
+                android:inputType="text"
+                android:textColor="#ff00ff">
+            </EditText>
+        </TableRow>
+
+        <Button
+            android:id="@+id/SDKInit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="引擎初始化" />
+        <Button
+            android:id="@+id/startPrevieworstopPreview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="开始预览" />
+        <Button
+            android:id="@+id/joinRoomorleaveRoom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="加入房间" />
+        <Button
+            android:id="@+id/startorstoppush"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="开始推流" />
+        <Button
+            android:id="@+id/switchCamera"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="切换摄像头" />
+        <Button
+            android:id="@+id/subscribeorunsubscribe"
+            android:visibility="invisible"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="开始拉流" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_gravity="clip_horizontal">
+            <CheckBox
+                android:id="@+id/muteLocalAudio"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="禁用本地音频"/>
+            <CheckBox
+                android:id="@+id/muteLocalVideo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="禁用本地视频" />
+        </LinearLayout>
+
+        <TableRow>
+            <TextView android:text="码率:   "
+                      android:visibility="visible"/>
+            <TextView
+                android:id="@+id/bitrate"
+                android:text="0 k/s"
+                android:visibility="visible"
+                android:textColor="#ff00ff" />
+        </TableRow>
+
+        <TableRow>
+            <TextView android:text="帧率:   "
+                      android:visibility="visible"/>
+            <TextView
+                android:id="@+id/fps"
+                android:text=""
+                android:visibility="visible"
+                android:textColor="#ff00ff" />
+        </TableRow>
+        <TableRow>
+            <TextView android:text="分辨率:   "
+                      android:visibility="visible"/>
+            <TextView
+                android:id="@+id/resolution"
+                android:text=""
+                android:visibility="visible"
+                android:textColor="#ff00ff" />
+        </TableRow>
+        <TableRow>
+            <TextView android:text="CPU:   "
+                      android:visibility="visible"/>
+            <TextView
+                android:id="@+id/cpuUsed"
+                android:text="0%"
+                android:visibility="visible"
+                android:textColor="#ff00ff" />
+        </TableRow>
+
+    </TableLayout>
+
+</RelativeLayout>

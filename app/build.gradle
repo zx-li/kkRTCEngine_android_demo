@@ -1,0 +1,50 @@
+apply plugin: 'com.android.application'
+
+android {
+    signingConfigs {
+        config {
+            keyAlias 'AndroidKkEngine'
+            keyPassword 'lzx19890709'
+            storeFile file('D:/kkengine/kkrtc/release/AndroidKkEngine.jks')
+            storePassword 'lzx19890709'
+        }
+    }
+    compileSdkVersion 22
+    buildToolsVersion '26.0.2'
+    defaultConfig {
+        applicationId "com.melot.engine"
+        minSdkVersion 18
+        targetSdkVersion 21
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
+        }
+        debug {
+            debuggable true
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+}
+
+dependencies {
+    compile 'com.android.support:appcompat-v7:22.1.1'
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile 'com.koushikdutta.async:androidasync:2.+'
+    compile 'com.mcxiaoke.volley:library:1.0.15@aar'
+    compile files('libs/kkRTCEngine.jar')
+    compile 'com.android.support:appcompat-v7:22.1.1'
+    compile 'com.android.support:support-v4:22.1.1'
+}
