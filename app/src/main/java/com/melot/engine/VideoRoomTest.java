@@ -5,6 +5,7 @@ import android.opengl.EGLContext;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.WindowManager;
 import android.widget.RelativeLayout;
 
 import org.json.JSONArray;
@@ -51,15 +52,22 @@ public class VideoRoomTest implements KkEventHandler {
 
     private boolean audio_test = true;
 
+    private VideoRenderer.Callbacks localRender;
     private boolean isstartPreviewRemoteVideo = false;
     private boolean isjoinRoom = false;
     private Context mContext = null;
     private RelativeLayout mLayout = null;
+    private RelativeLayout mSurfacelayout = null;
+    private RelativeLayout mLocalSurfacelayout = null;
+    private KkRenderGuiManager mLocalRenderManager;
     private KkRenderGuiManager mRenderManager[] = new KkRenderGuiManager[4];
 
-    public VideoRoomTest(/*VideoRenderer.Callbacks localRender, VideoRenderer.Callbacks[] remoteRenders,*/Context context, String appId, RelativeLayout layout) {
+    public VideoRoomTest(/*VideoRenderer.Callbacks localRender, VideoRenderer.Callbacks[] remoteRenders,*/Context context, String appId, RelativeLayout layout,RelativeLayout surfacelayout,RelativeLayout localsurfacelayout) {
         mContext = context;
         mLayout = layout;
+        mSurfacelayout = surfacelayout;
+        mLocalSurfacelayout = localsurfacelayout;
+
         this.mEngineEventHandler = new KkEngineEventHandler(/*mContext*/context);
         try{
             mEngine = KkRTCEngine.createEngine(context,appId,mEngineEventHandler.mRtcEventHandler);
@@ -75,70 +83,52 @@ public class VideoRoomTest implements KkEventHandler {
         return mEngine.initialize(context, eglContext,null);
     }
 
-    public void startPreView(VideoRenderer.Callbacks localrender){
-        if (mEngine != null){
-            mEngine.startPreview(1,localrender);
-        }
-
 /*
-        for(int m = 0;m<mRenderManager.length;m++){
-            mRenderManager[m] = new KkRenderGuiManager(mEngine);
-            mRenderManager[m].createRenderer(50, m*20+5, 40, 20, RendererCommon.ScalingType.SCALE_ASPECT_FILL, true);
-            //mRenderManager[m].addCheckbox(mContext,mLayout,50, m*20+5);
-        }
+    public VideoRenderer.Callbacks setupLocalVideo(VideoCanvas canvas){
+        return mEngine.setupLocalVideo(canvas);
+    }
 */
+
+    public void startPreView(){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                //KkVideoRendererGui.init();
+                mLocalRenderManager = new KkRenderGuiManager(mEngine);
+                mLocalRenderManager.createLocalRenderer(mContext,mLocalSurfacelayout,0,0, 100, 100, RendererCommon.ScalingType.SCALE_ASPECT_FILL, true);
+                if (mEngine != null){
+                    mEngine.startPreview(1,mLocalRenderManager.getRenderer());
+                }
+            }
+        });
+
     }
 
     public void stopPreview(){
         if (mEngine != null){
             mEngine.stopPreview();
         }
+        mLocalRenderManager.destroyLocal();
+        mLocalRenderManager = null;
     }
 
     public void switchCamera(){
         if(mEngine != null){
             mEngine.switchCamera();
         }
-/*
-        mEngine.muteLocalVideoStream(audio_test);
-        audio_test = !audio_test;
-*/
-
-/*
-        try {
-            JSONObject pub = publishers_array.getJSONObject(0);
-            if (!localuserId.equals(pub.getString("userId"))){
-                JSONArray streamnames = pub.getJSONArray("streamNames");
-                String streamname = streamnames.getString(0);
-                mEngine.muteLocalVideoStream(streamname,audio_test);
-            }
-
-        }catch (Exception ex){
-            String err = ex.toString();
-            Log.e(TAG,"lzx subScribe Exception = " + err);
-        }
-*/
     }
 
     public void joinRoom(int roomid){
-
-/*
-        for(int m = 0;m<mRenderManager.length;m++){
-            mRenderManager[m] = new KkRenderGuiManager(mEngine);
-            mRenderManager[m].createRenderer(50, m*20+5, 40, 20, RendererCommon.ScalingType.SCALE_ASPECT_FILL, true);
-            //mRenderManager[m].addCheckbox(mContext,mLayout,50, m*20+5);
-        }
-
-*/
-
         if (mEngine != null && !isjoinRoom){
-            mEngine.joinRoom(roomid,uid);
             isjoinRoom = true;
+            mEngine.joinRoom(roomid,uid);
         }
     }
 
     public void leaveRoom(){
         if (mEngine != null && isjoinRoom){
+            isjoinRoom = false;
+
             mEngine.leaveRoom();
 
             for(int m = 0;m<mRenderManager.length;m++){
@@ -148,8 +138,6 @@ public class VideoRoomTest implements KkEventHandler {
                     mRenderManager[m] = null;
                 }
             }
-
-            isjoinRoom = false;
         }
     }
 
@@ -182,9 +170,9 @@ public class VideoRoomTest implements KkEventHandler {
                                     if (test == m && mRenderManager[m] == null){
                                         //streamNames[m] = streamname;
                                         test = test + 1;
-                                        mRenderManager[m] = new KkRenderGuiManager(mEngine);
-                                        mRenderManager[i].createRenderer(mContext,mLayout,50, m*20+5, 40, 20, RendererCommon.ScalingType.SCALE_ASPECT_FILL, true);
-                                        mRenderManager[i].subscribe(streamname);
+                                       // mRenderManager[m] = new KkRenderGuiManager(mEngine);
+                                        //mRenderManager[i].createRenderer(mContext,mLayout,mSurfacelayout,50, m*20+5, 40, 20, RendererCommon.ScalingType.SCALE_ASPECT_FILL, true);
+                                        //mRenderManager[i].subscribe(streamname);
                                         Log.d(TAG,"lzx Test startPreviewRemoteVideo streamname = " + streamname);
                                         break;
                                     }
@@ -224,6 +212,12 @@ public class VideoRoomTest implements KkEventHandler {
     public void muteLocalAudioStream(boolean muted){
         if (mEngine != null){
             mEngine.muteLocalAudioStream(muted);
+        }
+    }
+
+    public void getRtcStats(KkRTCEngine.KkStatObserver observer) {
+        if (mEngine != null){
+            mEngine.getRtcStats(observer);
         }
     }
 
@@ -315,7 +309,7 @@ public class VideoRoomTest implements KkEventHandler {
 
     public void onPublisherInRoom(JSONArray array){
         publishers_array = array;
-
+        if (isjoinRoom) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -341,18 +335,19 @@ public class VideoRoomTest implements KkEventHandler {
                             }
 
                             for (int i = 0; i < mRenderManager.length; i++) {
-                                if(mRenderManager[i] != null){
+                                if (mRenderManager[i] != null) {
                                     boolean tag = false;
                                     for (int j = 0; j < Names.length; j++) {
-                                            if (mRenderManager[i].getStreamName() != null) {
-                                                if (mRenderManager[i].getStreamName().equals(Names[j])) {
-                                                    tag = true;
-                                                    break;
-                                                }
+                                        if (mRenderManager[i].getStreamName() != null) {
+                                            if (mRenderManager[i].getStreamName().equals(Names[j])) {
+                                                tag = true;
+                                                break;
                                             }
                                         }
+                                    }
                                     if (!tag) {
                                         if (mRenderManager[i].getStreamName() != null) {
+                                            Log.d(TAG, "lzx Test onPublisherInRoom unSubscribe");
                                             mRenderManager[i].unSubscribe();
                                             mRenderManager[i].destroy();
                                             mRenderManager[i] = null;
@@ -374,12 +369,14 @@ public class VideoRoomTest implements KkEventHandler {
                                 if (!tag) {
                                     for (int m = 0; m < mRenderManager.length; m++) {
                                         if (Names[i] != null) {
-                                            if (mRenderManager[m] == null){
+                                            if (mRenderManager[m] == null) {
                                                 mRenderManager[m] = new KkRenderGuiManager(mEngine);
-                                                mRenderManager[m].createRenderer(mContext,mLayout,50, m*20+5, 40, 20, RendererCommon.ScalingType.SCALE_ASPECT_FILL, true);
+                                                Log.d(TAG, "lzx Test onPublisherInRoom subscribe");
+                                                mRenderManager[m].createRenderer(mContext, mLayout, mSurfacelayout, 50, m * 20 + 5, 40, 20, RendererCommon.ScalingType.SCALE_ASPECT_FILL, true);
                                             }
-                                            if (mRenderManager[m].getStreamName() == null){
+                                            if (mRenderManager[m].getStreamName() == null) {
                                                 mRenderManager[m].subscribe(Names[i]);
+                                                Log.d(TAG, "lzx Test subscribe streamName = " + Names[i] + " localuserId = " + localuserId);
                                                 break;
                                             }
 
@@ -389,12 +386,13 @@ public class VideoRoomTest implements KkEventHandler {
                             }
 
                         } catch (Exception ex) {
-                            Log.d(TAG,"lzx Test onPublisherInRoom8 ");
+                            Log.d(TAG, "lzx Test onPublisherInRoom8 ");
                             Log.e(TAG, "lzx Test subScribe Exception = " + ex.toString());
                         }
                     }
                 }
             });
+        }
     }
 
     public void onError(int err){

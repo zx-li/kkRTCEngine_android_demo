@@ -1,7 +1,9 @@
 package com.melot.engine;
 
+import android.opengl.GLSurfaceView;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Printer;
 import android.view.WindowManager;
 import android.widget.CheckBox;
 
@@ -25,9 +27,11 @@ public class KkRenderGuiManager {
     private CheckBox muteRemoteAudiocheckbox;
     private CheckBox muteRemoteVideocheckbox;
     public VideoRenderer.Callbacks renderer = null;
+    private GLSurfaceView surfaceView;
     private KkRTCEngine mEngine = null;
     private String mStreamName = null;
     private RelativeLayout mLayout = null;
+    private RelativeLayout mSurfacelayout = null;
     private int x = 0;
     private int y = 0;
     private int w = 0;
@@ -49,7 +53,6 @@ public class KkRenderGuiManager {
         if(mEngine != null && renderer != null){
             mEngine.subscribe(mStreamName,renderer);
         }
-        KkVideoRendererGui.update(renderer,x,y,w,h,scalingType,mirror);
     }
 
     public void unSubscribe(){
@@ -59,8 +62,7 @@ public class KkRenderGuiManager {
         mStreamName = null;
     }
 
-    public void createRenderer(Context context, RelativeLayout layout,int x, int y, int width, int height, RendererCommon.ScalingType scalingType, boolean mirror){
-        renderer = KkVideoRendererGui.create(x,y,width,height,scalingType,mirror);
+    public void createLocalRenderer(Context context,RelativeLayout surface_layout,int x, int y, int width, int height, RendererCommon.ScalingType scalingType, boolean mirror){
         this.x = x;
         this.y = y;
         this.w = width;
@@ -68,11 +70,42 @@ public class KkRenderGuiManager {
         this.scalingType = scalingType;
         this.mirror = mirror;
 
-        Log.d("lzx","lzx Test createRenderer");
-        mLayout = layout;
+        mSurfacelayout = surface_layout;
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        int w = wm.getDefaultDisplay().getWidth();
-        int h = wm.getDefaultDisplay().getHeight();
+        int W = wm.getDefaultDisplay().getWidth();
+        int H = wm.getDefaultDisplay().getHeight();
+
+        surfaceView = new GLSurfaceView(context);
+        RelativeLayout.LayoutParams surfaceView_layoutParams = new RelativeLayout.LayoutParams(400, 400);
+        surfaceView_layoutParams.leftMargin = 0;
+        surfaceView_layoutParams.topMargin = -0+y*H/100;
+        surfaceView_layoutParams.bottomMargin = -400+y*H/100;
+        surfaceView_layoutParams.rightMargin = 400;
+        surfaceView.setLayoutParams(surfaceView_layoutParams);
+        mSurfacelayout.addView(surfaceView);
+        surfaceView.setPreserveEGLContextOnPause(true);
+        surfaceView.setKeepScreenOn(true);
+
+        VideoCanvas canvas = new VideoCanvas(surfaceView,0,0,100,100,scalingType,mirror);
+        if (mEngine != null){
+            renderer = mEngine.setupLocalVideo(canvas);
+        }
+    }
+
+    public void createRenderer(Context context, RelativeLayout layout,RelativeLayout surface_layout,int x, int y, int width, int height, RendererCommon.ScalingType scalingType, boolean mirror){
+        this.x = x;
+        this.y = y;
+        this.w = width;
+        this.h = height;
+        this.scalingType = scalingType;
+        this.mirror = mirror;
+
+        Log.d("lzx","lzx Test KkRenderGuiManager createRenderer1");
+        mLayout = layout;
+        mSurfacelayout = surface_layout;
+        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        int W = wm.getDefaultDisplay().getWidth();
+        int H = wm.getDefaultDisplay().getHeight();
 
         muteRemoteAudiocheckbox = new CheckBox(context);
         muteRemoteVideocheckbox = new CheckBox(context);
@@ -86,15 +119,15 @@ public class KkRenderGuiManager {
         RelativeLayout.LayoutParams layoutParams1 = new RelativeLayout.LayoutParams(300, 60);
         RelativeLayout.LayoutParams layoutParams2 = new RelativeLayout.LayoutParams(300, 60);
         layoutParams1.leftMargin = 750;
-        layoutParams1.topMargin = -0+y*h/100;
-        layoutParams1.bottomMargin = -60+y*h/100;
+        layoutParams1.topMargin = -0+y*H/100;
+        layoutParams1.bottomMargin = -60+y*H/100;
         layoutParams1.rightMargin =1050;
         muteRemoteVideocheckbox.setLayoutParams(layoutParams1);
         mLayout.addView(muteRemoteVideocheckbox);
 
         layoutParams2.leftMargin = 750;
-        layoutParams2.topMargin = -0+y*h/100+60;
-        layoutParams2.bottomMargin = -60+y*h/100+60;
+        layoutParams2.topMargin = -0+y*H/100+60;
+        layoutParams2.bottomMargin = -60+y*H/100+60;
         layoutParams2.rightMargin =1050;
         muteRemoteAudiocheckbox.setLayoutParams(layoutParams2);
         mLayout.addView(muteRemoteAudiocheckbox);
@@ -116,6 +149,25 @@ public class KkRenderGuiManager {
             }
         });
 
+        surfaceView = new GLSurfaceView(context);
+        RelativeLayout.LayoutParams surfaceView_layoutParams = new RelativeLayout.LayoutParams(500, 400);
+        surfaceView_layoutParams.leftMargin = 600;
+        surfaceView_layoutParams.topMargin = -0+y*H/100;
+        surfaceView_layoutParams.bottomMargin = -400+y*H/100;
+        surfaceView_layoutParams.rightMargin =1100;
+        surfaceView.setLayoutParams(surfaceView_layoutParams);
+        mSurfacelayout.addView(surfaceView);
+        surfaceView.setPreserveEGLContextOnPause(true);
+        surfaceView.setKeepScreenOn(true);
+
+        VideoCanvas canvas = new VideoCanvas(surfaceView,0,0,100,100,scalingType,mirror);
+        if (mEngine != null){
+            renderer = mEngine.setupRemoteVideo(canvas);
+        }
+
+        Log.d("lzx","lzx Test KkRenderGuiManager createRenderer2");
+        //renderer = KkVideoRendererGui.create(canvas);
+
     }
 
     public void deleteRenderer(){
@@ -129,14 +181,28 @@ public class KkRenderGuiManager {
 
 
     public void destroy(){
+        Log.d("lzx","lzx Test KkRenderGuiManager destroy1");
         //mLayout.removeAllViews();
         mLayout.removeView(muteRemoteAudiocheckbox);
         mLayout.removeView(muteRemoteVideocheckbox);
+        mSurfacelayout.removeView(surfaceView);
+
         KkVideoRendererGui.remove(renderer);
         renderer = null;
         mEngine = null;
         mStreamName = null;
-
+        surfaceView = null;
+        Log.d("lzx","lzx Test KkRenderGuiManager destroy2");
         //System.gc();
+    }
+
+    public void destroyLocal(){
+        mSurfacelayout.removeView(surfaceView);
+
+        KkVideoRendererGui.remove(renderer);
+        renderer = null;
+        mEngine = null;
+        mStreamName = null;
+        surfaceView = null;
     }
 }

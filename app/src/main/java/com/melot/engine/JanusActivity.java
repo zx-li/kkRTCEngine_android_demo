@@ -16,18 +16,23 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
 import org.webrtc.KkVideoRendererGui;
 import org.webrtc.RendererCommon;
 import org.webrtc.VideoRenderer;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TimerTask;
 
-public class JanusActivity extends Activity  implements View.OnClickListener, com.melot.engine.Timer.OnTimeListener {
+public class JanusActivity extends Activity  implements View.OnClickListener,
+        com.melot.engine.Timer.OnTimeListener, KkRTCEngine.KkStatObserver {
     private static final boolean AUTO_HIDE = true;
 
     AndroidUtils systemHelper = null;
 
     private GLSurfaceView vsv;
+    private GLSurfaceView remotevsv;
     private VideoRenderer.Callbacks localRender;
     private VideoRenderer.Callbacks remoteRender;
     private VideoRoomTest videoRoomTest;
@@ -59,7 +64,7 @@ public class JanusActivity extends Activity  implements View.OnClickListener, co
     private boolean ismuteRemoteAudio = false;
     private boolean ismuteRemoteVideo = false;
 
-    private RelativeLayout testlayout;
+    private RelativeLayout testlayout,surface_layout,localsurface_layout;
     private Timer freshTimer = null;
     private TextView cpuUsedView;
     private TextView bitrateView;
@@ -126,7 +131,7 @@ public class JanusActivity extends Activity  implements View.OnClickListener, co
                 e.printStackTrace();
             }
 
-            videoRoomTest = new VideoRoomTest(JanusActivity.this,appid,testlayout);
+            videoRoomTest = new VideoRoomTest(JanusActivity.this,appid,testlayout,surface_layout,localsurface_layout);
             videoRoomTest.initializeMediaContext(JanusActivity.this, true, /*con*/null);
             //videoRoomTest.Start();
 
@@ -148,11 +153,19 @@ public class JanusActivity extends Activity  implements View.OnClickListener, co
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         testlayout = (RelativeLayout)findViewById(R.id.kkrtc_checkbox);
+        localsurface_layout = (RelativeLayout)findViewById(R.id.kkrtc_container);
+        surface_layout = (RelativeLayout)findViewById(R.id.kkrtc_container2);
 
+/*
         vsv = (GLSurfaceView) findViewById(R.id.glview);
         vsv.setPreserveEGLContextOnPause(true);
         vsv.setKeepScreenOn(true);
-        KkVideoRendererGui.setView(vsv, new MyInit()/*,this*/);
+        //KkVideoRendererGui.setView(vsv, new MyInit()*/
+/*,this*//*
+);
+        KkVideoRendererGui.init();
+        localRender = KkVideoRendererGui.create(new VideoCanvas(vsv,0,0,100,100,RendererCommon.ScalingType.SCALE_ASPECT_FIT, true));//videoRoomTest.setupLocalVideo(new VideoCanvas(vsv,0,0,100,100,RendererCommon.ScalingType.SCALE_ASPECT_FIT, true));
+*/
 
         sdkInitBtn = (Button) findViewById(R.id.SDKInit);
         sdkInitBtn.setOnClickListener(this);
@@ -215,8 +228,6 @@ public class JanusActivity extends Activity  implements View.OnClickListener, co
         appId_Edit = (TextView) findViewById(R.id.appid);
         appId_Edit.setText("1");
 
-        localRender = KkVideoRendererGui.create(0, 0, 100, 100, /*KkVideoRendererGui*/RendererCommon.ScalingType.SCALE_ASPECT_FIT, true);
-
         systemHelper = new AndroidUtils();
         systemHelper.loadImageBuf(this);
         freshTimer = new Timer(1000, true, this);
@@ -230,16 +241,39 @@ public class JanusActivity extends Activity  implements View.OnClickListener, co
 
     public void onTime(Timer timer){
         updateCpu();
+        if (videoRoomTest != null) {
+            videoRoomTest.getRtcStats(this);
+        }
+    }
+
+    public void onRtcStat(final Map<String, String> reports) {
+        if (videoRoomTest != null) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (reports.containsKey("Fps") == true) {
+                        fpsView.setText(reports.get("Fps") + " fps");
+                    }
+                    if ((reports.containsKey("ActualBitrate") == true) &&
+                        (reports.containsKey("TargetBitrate") == true)){
+                        String bitrate = Integer.parseInt(reports.get("ActualBitrate"))/1000 + " / " +
+                                Integer.parseInt(reports.get("ActualBitrate"))/1000 + " k/s";
+                        bitrateView.setText(bitrate);
+                    }
+
+                    if ((reports.containsKey("EncoderWidth") == true) &&
+                            (reports.containsKey("EncoderHeight") == true)){
+                        resolutionView.setText(reports.get("EncoderWidth") + "x" + reports.get("EncoderHeight"));
+                    }
+                }
+            });
+
+        }
     }
 
     private void updateCpu() {
         long cpu = systemHelper.getProcessCpuUsed();
         cpuUsedView.setText(Long.toString(cpu) + " %");
-        if (videoRoomTest != null){
-            resolutionView.setText(Integer.toString(videoRoomTest.getVideoWidth()) + "x" + Integer.toString(videoRoomTest.getVideoHeight()));
-            fpsView.setText("");
-            bitrateView.setText(Integer.toString(videoRoomTest.getBitrate()));
-        }
     }
 
     @Override
@@ -277,11 +311,11 @@ public class JanusActivity extends Activity  implements View.OnClickListener, co
 
         if (arg0.getId() == R.id.startPrevieworstopPreview) {
             if (!isStartPreview && !isjoinRoom){
-                videoRoomTest.startPreView(localRender);
+                videoRoomTest.startPreView(/*localRender*/);
                 startorstopPreviewBtn.setText("停止预览");
                 isStartPreview=true;
             }else{
-                if(isStartPreview && !isstartPush){
+                if(isStartPreview && !isstartPush && !isjoinRoom){
                     videoRoomTest.stopPreview();
                     startorstopPreviewBtn.setText("开始预览");
                     isStartPreview=false;
