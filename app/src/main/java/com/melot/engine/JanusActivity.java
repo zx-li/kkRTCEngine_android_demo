@@ -131,8 +131,8 @@ public class JanusActivity extends Activity  implements View.OnClickListener,
                 e.printStackTrace();
             }
 
-            videoRoomTest = new VideoRoomTest(JanusActivity.this,appid,testlayout,surface_layout,localsurface_layout);
-            videoRoomTest.initializeMediaContext(JanusActivity.this, true, /*con*/null);
+            videoRoomTest = new VideoRoomTest(JanusActivity.this,testlayout,surface_layout,localsurface_layout);
+            videoRoomTest.initializeMediaContext(JanusActivity.this,appid, true, /*con*/null);
             //videoRoomTest.Start();
 
 
@@ -297,7 +297,7 @@ public class JanusActivity extends Activity  implements View.OnClickListener,
                 issdkInit=true;
             }else{
                 if(issdkInit && !isStartPreview && !isjoinRoom && !isstartPush && !issubscribe){
-
+                    videoRoomTest.unit();
                     sdkInitBtn.setText("初始化引擎");
                     issdkInit=false;
                 }

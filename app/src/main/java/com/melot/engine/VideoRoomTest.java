@@ -62,12 +62,14 @@ public class VideoRoomTest implements KkEventHandler {
     private KkRenderGuiManager mLocalRenderManager;
     private KkRenderGuiManager mRenderManager[] = new KkRenderGuiManager[4];
 
-    public VideoRoomTest(/*VideoRenderer.Callbacks localRender, VideoRenderer.Callbacks[] remoteRenders,*/Context context, String appId, RelativeLayout layout,RelativeLayout surfacelayout,RelativeLayout localsurfacelayout) {
+    public VideoRoomTest(/*VideoRenderer.Callbacks localRender, VideoRenderer.Callbacks[] remoteRenders,*/Context context,  RelativeLayout layout,RelativeLayout surfacelayout,RelativeLayout localsurfacelayout) {
         mContext = context;
         mLayout = layout;
         mSurfacelayout = surfacelayout;
         mLocalSurfacelayout = localsurfacelayout;
+    }
 
+    public boolean initializeMediaContext(Context context, String appId,boolean videoHwAcceleration, EGLContext eglContext){
         this.mEngineEventHandler = new KkEngineEventHandler(/*mContext*/context);
         try{
             mEngine = KkRTCEngine.createEngine(context,appId,mEngineEventHandler.mRtcEventHandler);
@@ -76,11 +78,13 @@ public class VideoRoomTest implements KkEventHandler {
         }catch (Exception ex){
 
         }
-
+        return mEngine.initialize(context, eglContext,null);
     }
 
-    public boolean initializeMediaContext(Context context, boolean videoHwAcceleration, EGLContext eglContext){
-        return mEngine.initialize(context, eglContext,null);
+    public void unit(){
+        mEngine.uninit();
+        mEngine.destroyEngine();
+        this.mEngineEventHandler = null;
     }
 
 /*
@@ -420,6 +424,10 @@ public class VideoRoomTest implements KkEventHandler {
     }
 
     public void onLastmileQuality(int quality){
+
+    }
+
+    public void onLeaveChannel(){
 
     }
 
