@@ -229,7 +229,7 @@ public class JanusActivity extends Activity  implements View.OnClickListener,
         appId_Edit.setText("1");
 
         systemHelper = new AndroidUtils();
-        systemHelper.loadImageBuf(this);
+        //systemHelper.loadImageBuf(this);
         freshTimer = new Timer(1000, true, this);
         //freshTimer.resume();
 
