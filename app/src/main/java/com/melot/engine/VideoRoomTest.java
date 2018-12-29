@@ -5,17 +5,14 @@ import android.opengl.EGLContext;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
-import android.view.WindowManager;
 import android.widget.RelativeLayout;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.webrtc.KkVideoRendererGui;
 import org.webrtc.RendererCommon;
 import org.webrtc.VideoRenderer;
 import java.math.BigInteger;
 import java.util.ArrayDeque;
-import java.util.Arrays;
 import java.util.Deque;
 import java.util.HashMap;
 
@@ -60,6 +57,7 @@ public class VideoRoomTest implements KkEventHandler {
     private RelativeLayout mSurfacelayout = null;
     private RelativeLayout mLocalSurfacelayout = null;
     private KkRenderGuiManager mLocalRenderManager;
+    //private KkLocalRenderGuiManager mLocalRenderManager;
     private KkRenderGuiManager mRenderManager[] = new KkRenderGuiManager[4];
 
     public VideoRoomTest(/*VideoRenderer.Callbacks localRender, VideoRenderer.Callbacks[] remoteRenders,*/Context context,  RelativeLayout layout,RelativeLayout surfacelayout,RelativeLayout localsurfacelayout) {
@@ -97,8 +95,8 @@ public class VideoRoomTest implements KkEventHandler {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                //KkVideoRendererGui.init();
                 mLocalRenderManager = new KkRenderGuiManager(mEngine);
+                //mLocalRenderManager = new KkLocalRenderGuiManager(mEngine);
                 mLocalRenderManager.createLocalRenderer(mContext,mLocalSurfacelayout,0,0, 100, 100, RendererCommon.ScalingType.SCALE_ASPECT_FILL, true);
                 if (mEngine != null){
                     mEngine.startPreview(1,mLocalRenderManager.getRenderer());
@@ -112,8 +110,10 @@ public class VideoRoomTest implements KkEventHandler {
         if (mEngine != null){
             mEngine.stopPreview();
         }
-        mLocalRenderManager.destroyLocal();
-        mLocalRenderManager = null;
+        if (mLocalRenderManager != null){
+            mLocalRenderManager.destroyLocal();
+            mLocalRenderManager = null;
+        }
     }
 
     public void switchCamera(){
@@ -174,9 +174,9 @@ public class VideoRoomTest implements KkEventHandler {
                                     if (test == m && mRenderManager[m] == null){
                                         //streamNames[m] = streamname;
                                         test = test + 1;
-                                       // mRenderManager[m] = new KkRenderGuiManager(mEngine);
-                                        //mRenderManager[i].createRenderer(mContext,mLayout,mSurfacelayout,50, m*20+5, 40, 20, RendererCommon.ScalingType.SCALE_ASPECT_FILL, true);
-                                        //mRenderManager[i].subscribe(streamname);
+                                        mRenderManager[m] = new KkRenderGuiManager(mEngine);
+                                        mRenderManager[m].createRenderer(mContext,streamname,mLayout,mSurfacelayout,50, m*20+5, 40, 20, RendererCommon.ScalingType.SCALE_ASPECT_FILL, true);
+                                        mRenderManager[m].subscribe(streamname);
                                         Log.d(TAG,"lzx Test startPreviewRemoteVideo streamname = " + streamname);
                                         break;
                                     }
@@ -198,9 +198,11 @@ public class VideoRoomTest implements KkEventHandler {
         if (isstartPreviewRemoteVideo && isjoinRoom) {
             if (mEngine != null) {
                 for (int i = 0; i < mRenderManager.length; i++) {
-                    mRenderManager[i].unSubscribe();
-                    mRenderManager[i].destroy();
-                    mRenderManager[i] = null;
+                    if (mRenderManager[i] != null){
+                        mRenderManager[i].unSubscribe();
+                        mRenderManager[i].destroy();
+                        mRenderManager[i] = null;
+                    }
                 }
             }
             isstartPreviewRemoteVideo = false;
@@ -376,10 +378,11 @@ public class VideoRoomTest implements KkEventHandler {
                                             if (mRenderManager[m] == null) {
                                                 mRenderManager[m] = new KkRenderGuiManager(mEngine);
                                                 Log.d(TAG, "lzx Test onPublisherInRoom subscribe");
-                                                mRenderManager[m].createRenderer(mContext, mLayout, mSurfacelayout, 50, m * 20 + 5, 40, 20, RendererCommon.ScalingType.SCALE_ASPECT_FILL, true);
+                                                mRenderManager[m].createRenderer(mContext, Names[i], mLayout, mSurfacelayout, 50, m * 20 + 5, 40, 20, RendererCommon.ScalingType.SCALE_ASPECT_FILL, true);
                                             }
                                             if (mRenderManager[m].getStreamName() == null) {
-                                                mRenderManager[m].subscribe(Names[i]);
+                                                mRenderManager[m].setStreamName(Names[i]);
+                                                //mRenderManager[m].subscribe(Names[i]);
                                                 Log.d(TAG, "lzx Test subscribe streamName = " + Names[i] + " localuserId = " + localuserId);
                                                 break;
                                             }

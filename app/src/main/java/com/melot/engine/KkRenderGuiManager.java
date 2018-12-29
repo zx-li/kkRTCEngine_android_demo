@@ -4,12 +4,14 @@ import android.opengl.GLSurfaceView;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Printer;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.CheckBox;
 
 import android.content.Context;
 import android.widget.CompoundButton;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import org.webrtc.KkVideoRendererGui;
 import org.webrtc.RendererCommon;
@@ -24,6 +26,8 @@ import static org.webrtc.RendererCommon.ScalingType.SCALE_ASPECT_FIT;
  */
 
 public class KkRenderGuiManager {
+    private final String TAG = "KkRenderGuiManager";
+    private TextView mStreamNameTextView;
     private CheckBox muteRemoteAudiocheckbox;
     private CheckBox muteRemoteVideocheckbox;
     public VideoRenderer.Callbacks renderer = null;
@@ -38,6 +42,9 @@ public class KkRenderGuiManager {
     private int h = 0;
     private RendererCommon.ScalingType scalingType = SCALE_ASPECT_FIT;
     private boolean mirror = false;
+    private int kRemoteShowWidth=320;
+    private int kRemoteShowHeight=180;
+    private  boolean bSubscribering = false;
 
     public KkRenderGuiManager(KkRTCEngine engine){
         mEngine = engine;
@@ -47,7 +54,9 @@ public class KkRenderGuiManager {
     public String getStreamName(){
         return mStreamName;
     }
-
+    public void setStreamName(String streamName) {
+        mStreamName = streamName;
+    }
     public void subscribe(String name){
         mStreamName = name;
         if(mEngine != null && renderer != null){
@@ -92,88 +101,109 @@ public class KkRenderGuiManager {
         }
     }
 
-    public void createRenderer(Context context, RelativeLayout layout,RelativeLayout surface_layout,int x, int y, int width, int height, RendererCommon.ScalingType scalingType, boolean mirror){
-        this.x = x;
+    public void createRenderer(Context context, final String streanName, RelativeLayout layout, RelativeLayout surface_layout, int x, int y, int width, int height, RendererCommon.ScalingType scalingType, boolean mirror){
+/*        this.x = x;
         this.y = y;
         this.w = width;
         this.h = height;
         this.scalingType = scalingType;
-        this.mirror = mirror;
+        this.mirror = mirror;*/
 
-        Log.d("lzx","lzx Test KkRenderGuiManager createRenderer1");
+        Log.d("lzx","lzx Test createRenderer");
         mLayout = layout;
         mSurfacelayout = surface_layout;
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        int W = wm.getDefaultDisplay().getWidth();
-        int H = wm.getDefaultDisplay().getHeight();
+        int w = wm.getDefaultDisplay().getWidth();
+        int h = wm.getDefaultDisplay().getHeight();
 
         muteRemoteAudiocheckbox = new CheckBox(context);
         muteRemoteVideocheckbox = new CheckBox(context);
+        mStreamNameTextView = new TextView(context);
         muteRemoteAudiocheckbox.setVisibility(VISIBLE);
         muteRemoteVideocheckbox.setVisibility(VISIBLE);
+        mStreamNameTextView.setVisibility(VISIBLE);
         muteRemoteAudiocheckbox.bringToFront();
         muteRemoteVideocheckbox.bringToFront();
+        mStreamNameTextView.bringToFront();
         muteRemoteVideocheckbox.setText("视频");
         muteRemoteAudiocheckbox.setText("音频");
+        mStreamNameTextView.setText(streanName);
 
-        RelativeLayout.LayoutParams layoutParams1 = new RelativeLayout.LayoutParams(300, 60);
-        RelativeLayout.LayoutParams layoutParams2 = new RelativeLayout.LayoutParams(300, 60);
-        layoutParams1.leftMargin = 750;
-        layoutParams1.topMargin = -0+y*H/100;
-        layoutParams1.bottomMargin = -60+y*H/100;
-        layoutParams1.rightMargin =1050;
+        RelativeLayout.LayoutParams layoutParams1 = new RelativeLayout.LayoutParams(kRemoteShowWidth, kRemoteShowHeight/3);
+        RelativeLayout.LayoutParams layoutParams2 = new RelativeLayout.LayoutParams(kRemoteShowWidth, kRemoteShowHeight/3);
+        RelativeLayout.LayoutParams layoutParams3 = new RelativeLayout.LayoutParams(kRemoteShowWidth, kRemoteShowHeight/3);
+        layoutParams1.leftMargin = w-kRemoteShowWidth-16;
+        layoutParams1.topMargin = -0+y*h/100;
+        layoutParams1.bottomMargin = layoutParams1.topMargin + kRemoteShowHeight/3;
+        layoutParams1.rightMargin =layoutParams1.leftMargin+kRemoteShowWidth/2;
         muteRemoteVideocheckbox.setLayoutParams(layoutParams1);
         mLayout.addView(muteRemoteVideocheckbox);
 
-        layoutParams2.leftMargin = 750;
-        layoutParams2.topMargin = -0+y*H/100+60;
-        layoutParams2.bottomMargin = -60+y*H/100+60;
-        layoutParams2.rightMargin =1050;
+        layoutParams2.leftMargin = w-kRemoteShowWidth/2-16;
+        layoutParams2.topMargin = -0+y*h/100;
+        layoutParams2.bottomMargin = layoutParams1.topMargin + kRemoteShowHeight/3;
+        layoutParams2.rightMargin =layoutParams1.leftMargin+kRemoteShowWidth;
         muteRemoteAudiocheckbox.setLayoutParams(layoutParams2);
         mLayout.addView(muteRemoteAudiocheckbox);
+
+        layoutParams3.leftMargin = w-kRemoteShowWidth;
+        layoutParams3.topMargin = -0+y*h/100 + kRemoteShowHeight - 60;
+        layoutParams3.bottomMargin = -0+y*h/100 + kRemoteShowHeight;
+        layoutParams3.rightMargin =layoutParams3.leftMargin+kRemoteShowWidth;
+        mStreamNameTextView.setLayoutParams(layoutParams3);
+        mLayout.addView(mStreamNameTextView);
 
         muteRemoteAudiocheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (mEngine != null && mStreamName != null){
-                    mEngine.muteRemoteAudioStream(mStreamName,isChecked);
-                }
+            if (mEngine != null && mStreamName != null){
+                mEngine.muteRemoteAudioStream(mStreamName,isChecked);
+            }
             }
         });
         muteRemoteVideocheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (mEngine != null && mStreamName != null){
-                    mEngine.muteRemoteVideoStream(mStreamName,isChecked);
-                }
+            if (mEngine != null && mStreamName != null){
+                mEngine.muteRemoteVideoStream(mStreamName,isChecked);
+            }
             }
         });
 
+
         surfaceView = new GLSurfaceView(context);
-        RelativeLayout.LayoutParams surfaceView_layoutParams = new RelativeLayout.LayoutParams(500, 400);
-        surfaceView_layoutParams.leftMargin = 600;
-        surfaceView_layoutParams.topMargin = -0+y*H/100;
-        surfaceView_layoutParams.bottomMargin = -400+y*H/100;
-        surfaceView_layoutParams.rightMargin =1100;
+        RelativeLayout.LayoutParams surfaceView_layoutParams = new RelativeLayout.LayoutParams(kRemoteShowWidth, kRemoteShowHeight);
+        surfaceView_layoutParams.leftMargin = w-kRemoteShowWidth-16;
+        surfaceView_layoutParams.topMargin = -0+y*h/100;
+        surfaceView_layoutParams.bottomMargin = surfaceView_layoutParams.topMargin + kRemoteShowHeight;
+        surfaceView_layoutParams.rightMargin =surfaceView_layoutParams.leftMargin+kRemoteShowWidth;
         surfaceView.setLayoutParams(surfaceView_layoutParams);
         mSurfacelayout.addView(surfaceView);
+
+        surfaceView.setClickable(true);
+        surfaceView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+            if (bSubscribering == false) {
+                subscribe(mStreamName);
+                bSubscribering =true;
+            }
+            }
+        });
+
+
         surfaceView.setPreserveEGLContextOnPause(true);
+        surfaceView.setZOrderMediaOverlay(true);
         surfaceView.setKeepScreenOn(true);
 
         VideoCanvas canvas = new VideoCanvas(surfaceView,0,0,100,100,scalingType,mirror);
         if (mEngine != null){
             renderer = mEngine.setupRemoteVideo(canvas);
         }
-
-        Log.d("lzx","lzx Test KkRenderGuiManager createRenderer2");
         //renderer = KkVideoRendererGui.create(canvas);
 
     }
 
-    public void deleteRenderer(){
-        KkVideoRendererGui.remove(renderer);
-        renderer = null;
-    }
 
     public VideoRenderer.Callbacks getRenderer(){
         return renderer;
@@ -181,25 +211,25 @@ public class KkRenderGuiManager {
 
 
     public void destroy(){
-        Log.d("lzx","lzx Test KkRenderGuiManager destroy1");
+        Log.d(TAG,"kzx Test KkRenderGuiManager");
         //mLayout.removeAllViews();
         mLayout.removeView(muteRemoteAudiocheckbox);
         mLayout.removeView(muteRemoteVideocheckbox);
+        mLayout.removeView(mStreamNameTextView);
         mSurfacelayout.removeView(surfaceView);
 
-        KkVideoRendererGui.remove(renderer);
+        //KkVideoRendererGui.remove(renderer);
         renderer = null;
         mEngine = null;
         mStreamName = null;
         surfaceView = null;
-        Log.d("lzx","lzx Test KkRenderGuiManager destroy2");
+
         //System.gc();
     }
 
     public void destroyLocal(){
         mSurfacelayout.removeView(surfaceView);
 
-        KkVideoRendererGui.remove(renderer);
         renderer = null;
         mEngine = null;
         mStreamName = null;

@@ -310,12 +310,12 @@ public class JanusActivity extends Activity  implements View.OnClickListener,
         }
 
         if (arg0.getId() == R.id.startPrevieworstopPreview) {
-            if (!isStartPreview && !isjoinRoom){
+            if (!isStartPreview){
                 videoRoomTest.startPreView(/*localRender*/);
                 startorstopPreviewBtn.setText("停止预览");
                 isStartPreview=true;
             }else{
-                if(isStartPreview && !isstartPush && !isjoinRoom){
+                if(!isstartPush){
                     videoRoomTest.stopPreview();
                     startorstopPreviewBtn.setText("开始预览");
                     isStartPreview=false;
@@ -385,7 +385,7 @@ public class JanusActivity extends Activity  implements View.OnClickListener,
             videoRoomTest.switchCamera();
         }
         if (arg0.getId() == R.id.subscribeorunsubscribe) {
-            if(!isjoinRoom || !isStartPreview)
+            if(!isjoinRoom)
                 return;
             if(!issubscribe){
                 videoRoomTest.startPreviewRemoteVideo();
