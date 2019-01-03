@@ -54,9 +54,11 @@ public class KkRenderGuiManager {
     public String getStreamName(){
         return mStreamName;
     }
+
     public void setStreamName(String streamName) {
         mStreamName = streamName;
     }
+
     public void subscribe(String name){
         mStreamName = name;
         if(mEngine != null && renderer != null){
@@ -204,11 +206,9 @@ public class KkRenderGuiManager {
 
     }
 
-
     public VideoRenderer.Callbacks getRenderer(){
         return renderer;
     }
-
 
     public void destroy(){
         Log.d(TAG,"kzx Test KkRenderGuiManager");

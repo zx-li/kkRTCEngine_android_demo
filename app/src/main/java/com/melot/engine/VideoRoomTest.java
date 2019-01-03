@@ -147,13 +147,13 @@ public class VideoRoomTest implements KkEventHandler {
 
     public void startPush(String url){
         if (mEngine != null){
-            mEngine.pushlish(url);
+            mEngine.publish(url);
         }
     }
 
     public void stopPush(){
         if (mEngine != null){
-            mEngine.unPushlish();
+            mEngine.unPublish();
         }
     }
 

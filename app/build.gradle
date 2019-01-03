@@ -41,7 +41,14 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile project(':kkRTCEngine')
+    compile files('libs/kkRTCEngine.jar')
     compile 'com.android.support:appcompat-v7:22.1.1'
     compile 'com.android.support:support-v4:22.1.1'
+
+    compile 'com.koushikdutta.async:androidasync:2.+'
+    compile 'com.mcxiaoke.volley:library:1.0.15@aar'
+    compile files('libs/base_java.jar')
+    compile files('libs/autobanh.jar')
+    compile files('libs/aavt.jar')
+    compile 'com.google.code.findbugs:jsr305:3.0.2'
 }
