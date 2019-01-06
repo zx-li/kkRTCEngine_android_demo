@@ -3,6 +3,7 @@ package com.melot.engine;
 import com.melot.engine.util.SystemUiHider;
 
 import android.app.Activity;
+import android.content.pm.ActivityInfo;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.os.Handler;
@@ -58,6 +59,7 @@ public class JanusActivity extends Activity  implements View.OnClickListener,
     private boolean isjoinRoom = false;
     private boolean isstartPush = false;
     private boolean issubscribe = false;
+    private boolean isSwitchLand = false;
 
     private boolean ismuteLocalAudio = false;
     private boolean ismuteLocalVideo = false;
@@ -383,6 +385,15 @@ public class JanusActivity extends Activity  implements View.OnClickListener,
         }
         if (arg0.getId() == R.id.switchCamera) {
             videoRoomTest.switchCamera();
+/*
+            if(!isSwitchLand){
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                isSwitchLand = true;
+            }else{
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                isSwitchLand = false;
+            }
+*/
         }
         if (arg0.getId() == R.id.subscribeorunsubscribe) {
             if(!isjoinRoom)

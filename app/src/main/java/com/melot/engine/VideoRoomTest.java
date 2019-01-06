@@ -147,6 +147,7 @@ public class VideoRoomTest implements KkEventHandler {
 
     public void startPush(String url){
         if (mEngine != null){
+            mEngine.setBitrate(100000);
             mEngine.publish(url);
         }
     }

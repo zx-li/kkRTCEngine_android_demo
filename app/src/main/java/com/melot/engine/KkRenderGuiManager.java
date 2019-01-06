@@ -74,6 +74,7 @@ public class KkRenderGuiManager {
     }
 
     public void createLocalRenderer(Context context,RelativeLayout surface_layout,int x, int y, int width, int height, RendererCommon.ScalingType scalingType, boolean mirror){
+
         this.x = x;
         this.y = y;
         this.w = width;
@@ -101,6 +102,32 @@ public class KkRenderGuiManager {
         if (mEngine != null){
             renderer = mEngine.setupLocalVideo(canvas);
         }
+
+/*
+        this.x = x;
+        this.y = y;
+        this.w = width;
+        this.h = height;
+        this.scalingType = scalingType;
+        this.mirror = mirror;
+        mSurfacelayout = surface_layout;
+        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        int w = wm.getDefaultDisplay().getWidth();
+        int h = wm.getDefaultDisplay().getHeight();
+
+        surfaceView = new GLSurfaceView(context);
+        RelativeLayout.LayoutParams surfaceView_layoutParams = new RelativeLayout.LayoutParams(w, h);
+        surfaceView.setLayoutParams(surfaceView_layoutParams);
+        mSurfacelayout.addView(surfaceView);
+        surfaceView.setPreserveEGLContextOnPause(true);
+        surfaceView.setKeepScreenOn(true);
+
+        VideoCanvas canvas = new VideoCanvas(surfaceView,0,0,100,100,scalingType,mirror);
+        if (mEngine != null){
+            renderer = mEngine.setupLocalVideo(canvas);
+        }
+*/
+
     }
 
     public void createRenderer(Context context, final String streanName, RelativeLayout layout, RelativeLayout surface_layout, int x, int y, int width, int height, RendererCommon.ScalingType scalingType, boolean mirror){
@@ -195,7 +222,7 @@ public class KkRenderGuiManager {
 
 
         surfaceView.setPreserveEGLContextOnPause(true);
-        surfaceView.setZOrderMediaOverlay(true);
+        //surfaceView.setZOrderMediaOverlay(true);
         surfaceView.setKeepScreenOn(true);
 
         VideoCanvas canvas = new VideoCanvas(surfaceView,0,0,100,100,scalingType,mirror);
