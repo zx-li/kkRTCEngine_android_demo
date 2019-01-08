@@ -91,12 +91,15 @@ public class VideoRoomTest implements KkEventHandler {
     }
 */
 
-    public void startPreView(){
+    public void startPreView(final RelativeLayout surface_layout){
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 mLocalRenderManager = new KkRenderGuiManager(mEngine);
                 //mLocalRenderManager = new KkLocalRenderGuiManager(mEngine);
+                if (surface_layout != null){
+                    mLocalSurfacelayout = surface_layout;
+                }
                 mLocalRenderManager.createLocalRenderer(mContext,mLocalSurfacelayout,0,0, 100, 100, RendererCommon.ScalingType.SCALE_ASPECT_FILL, true);
                 if (mEngine != null){
                     mEngine.startPreview(1,mLocalRenderManager.getRenderer());
@@ -115,6 +118,14 @@ public class VideoRoomTest implements KkEventHandler {
             mLocalRenderManager = null;
         }
     }
+
+    public void Test(RelativeLayout surface_layout){
+
+        if(mLocalRenderManager != null){
+            mLocalRenderManager.Test(surface_layout);
+        }
+    }
+
 
     public void switchCamera(){
         if(mEngine != null){
@@ -147,7 +158,7 @@ public class VideoRoomTest implements KkEventHandler {
 
     public void startPush(String url){
         if (mEngine != null){
-            mEngine.setBitrate(100000);
+            mEngine.setBitrate(600000);
             mEngine.publish(url);
         }
     }

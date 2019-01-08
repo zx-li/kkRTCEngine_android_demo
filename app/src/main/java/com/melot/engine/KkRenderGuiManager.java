@@ -13,7 +13,6 @@ import android.widget.CompoundButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import org.webrtc.KkVideoRendererGui;
 import org.webrtc.RendererCommon;
 import org.webrtc.VideoRenderer;
 
@@ -31,7 +30,7 @@ public class KkRenderGuiManager {
     private CheckBox muteRemoteAudiocheckbox;
     private CheckBox muteRemoteVideocheckbox;
     public VideoRenderer.Callbacks renderer = null;
-    private GLSurfaceView surfaceView;
+    private KkGLSurfaceView surfaceView;
     private KkRTCEngine mEngine = null;
     private String mStreamName = null;
     private RelativeLayout mLayout = null;
@@ -73,6 +72,18 @@ public class KkRenderGuiManager {
         mStreamName = null;
     }
 
+    public void Test(RelativeLayout surface_layout) {
+        surfaceView.setReplaceLayout(true);
+
+        mSurfacelayout.removeView(surfaceView);
+        mSurfacelayout = surface_layout;
+        RelativeLayout.LayoutParams surfaceView_layoutParams = new RelativeLayout.LayoutParams(400, 400);
+        mSurfacelayout.addView(surfaceView, surfaceView_layoutParams);
+
+        surfaceView.setReplaceLayout(false);
+
+    }
+
     public void createLocalRenderer(Context context,RelativeLayout surface_layout,int x, int y, int width, int height, RendererCommon.ScalingType scalingType, boolean mirror){
 
         this.x = x;
@@ -87,7 +98,7 @@ public class KkRenderGuiManager {
         int W = wm.getDefaultDisplay().getWidth();
         int H = wm.getDefaultDisplay().getHeight();
 
-        surfaceView = new GLSurfaceView(context);
+        surfaceView = new KkGLSurfaceView(context);
         RelativeLayout.LayoutParams surfaceView_layoutParams = new RelativeLayout.LayoutParams(400, 400);
         surfaceView_layoutParams.leftMargin = 0;
         surfaceView_layoutParams.topMargin = -0+y*H/100;
@@ -200,7 +211,7 @@ public class KkRenderGuiManager {
         });
 
 
-        surfaceView = new GLSurfaceView(context);
+        surfaceView = new KkGLSurfaceView(context);
         RelativeLayout.LayoutParams surfaceView_layoutParams = new RelativeLayout.LayoutParams(kRemoteShowWidth, kRemoteShowHeight);
         surfaceView_layoutParams.leftMargin = w-kRemoteShowWidth-16;
         surfaceView_layoutParams.topMargin = -0+y*h/100;

@@ -66,7 +66,7 @@ public class JanusActivity extends Activity  implements View.OnClickListener,
     private boolean ismuteRemoteAudio = false;
     private boolean ismuteRemoteVideo = false;
 
-    private RelativeLayout testlayout,surface_layout,localsurface_layout;
+    private RelativeLayout testlayout,surface_layout,localsurface_layout,localsurface_layoutTest;
     private Timer freshTimer = null;
     private TextView cpuUsedView;
     private TextView bitrateView;
@@ -157,6 +157,8 @@ public class JanusActivity extends Activity  implements View.OnClickListener,
         testlayout = (RelativeLayout)findViewById(R.id.kkrtc_checkbox);
         localsurface_layout = (RelativeLayout)findViewById(R.id.kkrtc_container);
         surface_layout = (RelativeLayout)findViewById(R.id.kkrtc_container2);
+
+        localsurface_layoutTest = (RelativeLayout)findViewById(R.id.kkrtc_containerTest) ;
 
 /*
         vsv = (GLSurfaceView) findViewById(R.id.glview);
@@ -313,7 +315,7 @@ public class JanusActivity extends Activity  implements View.OnClickListener,
 
         if (arg0.getId() == R.id.startPrevieworstopPreview) {
             if (!isStartPreview){
-                videoRoomTest.startPreView(/*localRender*/);
+                videoRoomTest.startPreView(/*localRender*/null);
                 startorstopPreviewBtn.setText("停止预览");
                 isStartPreview=true;
             }else{
@@ -384,7 +386,8 @@ public class JanusActivity extends Activity  implements View.OnClickListener,
 
         }
         if (arg0.getId() == R.id.switchCamera) {
-            videoRoomTest.switchCamera();
+            videoRoomTest.Test(localsurface_layoutTest);
+            //videoRoomTest.switchCamera();
 /*
             if(!isSwitchLand){
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
